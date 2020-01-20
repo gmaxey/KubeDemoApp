@@ -3,7 +3,7 @@ apiVersion: "apps/v1"
 kind: "Deployment"
 metadata:
   name: "microblog-backend"
-  namespace: "default"
+  #namespace: "default"
   labels:
     app: "microblog-backend"
 spec:
