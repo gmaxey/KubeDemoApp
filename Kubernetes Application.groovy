@@ -17,6 +17,10 @@
 	- kubectl config context with the same name as the Flow environments
 	- Github configuration
 	- Yaml file stored in github
+	
+	Notes on running the Model
+	- Artifact staging must be unselected for Deployment
+
 
 */
 
@@ -75,9 +79,9 @@ project proj,{
 
 					processStep 'Get yaml deploy file(s)', {
 						actualParameter = [
-							'clone': '0',
+							'clone': '1',
 							'config': github_config,
-							'dest': '.',
+							dest: '$[/myComponent/image_name]',
 							'GitRepo': '$[/myComponent/yaml_repo]',
 							'overwrite': '0',
 							'tag': '',
@@ -91,8 +95,7 @@ project proj,{
 						actualParameter = [
 							commandToRun: '''\
 								kubectl config use-context $[/myEnvironment/context]
-								sed \'s/@IMAGE@/$[/myComponent/image_name]/\' $[/myComponent/yaml_file] > $[/myJobStep/jobStepId].yaml
-								kubectl delete -f $[/myJobStep/jobStepId].yaml || echo ok
+								sed 's/image: .*/image: $[/myComponent/image_name]/' $[/myComponent/image_name]/$[/myComponent/yaml_file] | kubectl delete -f -  || echo ok
 							'''.stripIndent(),
 						]
 						applicationTierName = null
@@ -103,10 +106,9 @@ project proj,{
 
 					processStep 'Deploy', {
 						actualParameter = [
-							commandToRun: '''
+							commandToRun: '''\
 								kubectl config use-context $[/myEnvironment/context]
-								sed \'s/@IMAGE@/$[/myComponent/image_name]:$[$[/myComponent/componentName]_version]/\' $[/myComponent/yaml_file] > $[/myJobStep/jobStepId].yaml
-								kubectl create -f $[/myJobStep/jobStepId].yaml
+								sed 's/image: .*/image: $[/myComponent/image_name]:$[$[/myComponent/componentName]_version]/' $[/myComponent/image_name]/$[/myComponent/yaml_file] | kubectl create -f -
 							'''.stripIndent(),
 						]
 						applicationTierName = null
@@ -128,9 +130,9 @@ project proj,{
 
 					processStep 'Get yaml deploy file(s)', {
 						actualParameter = [
-							'clone': '0',
+							'clone': '1',
 							'config': github_config,
-							'dest': '.',
+							dest: '$[/myComponent/image_name]',
 							'GitRepo': '$[/myComponent/yaml_repo]',
 							'overwrite': '0',
 							'tag': '',
@@ -142,11 +144,9 @@ project proj,{
 					
 					processStep 'Uninstall', {
 						actualParameter = [
-							commandToRun: '''
+							commandToRun: '''\
 								kubectl config use-context $[/myEnvironment/context]
-								kubectl config use-context $[/myEnvironment/context]
-								sed \'s/@IMAGE@/$[/myComponent/image_name]/\' $[/myComponent/yaml_file] > $[/myJobStep/jobStepId].yaml
-								kubectl delete -f $[/myJobStep/jobStepId].yaml || echo ok
+								sed 's/image: .*/image: $[/myComponent/image_name]/' $[/myComponent/image_name]/$[/myComponent/yaml_file] | kubectl delete -f -  || echo ok
 							'''.stripIndent(),
 						]
 						applicationTierName = null
@@ -178,9 +178,9 @@ project proj,{
 
 					property 'versionRange', value: "\$[${image_name}_version]"
 				}
-				property image_name, value: image_name
-				property yaml_file, value: yaml_file
-				property yaml_repo, value: yaml_repo
+				property "image_name", value: image_name
+				property "yaml_file", value: yaml_file
+				property "yaml_repo", value: yaml_repo
 			}
 		}
 
