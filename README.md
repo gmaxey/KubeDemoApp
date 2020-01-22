@@ -1,2 +1,3 @@
 # KubeDemoApp
-Microblog app for Flow deployment demo
+
+See "Kubernetes Application.groovy" for details
