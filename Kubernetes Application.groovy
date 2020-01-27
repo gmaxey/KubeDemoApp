@@ -32,6 +32,7 @@ def image_version = '1.7.9'
 def yaml_file = 'demoNginx.yaml'
 def yaml_repo = 'https://github.com/gmaxey/KubeDemoApp.git'
 def github_config = "Greg's RO github"
+def kubectl_path = "/opt/google-cloud-sdk/bin/kubectl"
 
 def envs = ["dev","qa","preprod"]
 def tier = 'App Tier'
@@ -93,10 +94,10 @@ project proj,{
 
 					processStep 'Undeploy any existing', {
 						actualParameter = [
-							commandToRun: '''\
-								kubectl config use-context $[/myEnvironment/context]
-								sed 's/image: .*/image: $[/myComponent/image_name]/' $[/myComponent/image_name]/$[/myComponent/yaml_file] | kubectl delete -f -  || echo ok
-							'''.stripIndent(),
+							commandToRun: """\
+								$kubectl_path config use-context \$[/myEnvironment/context]
+								sed 's/image: .*/image: \$[/myComponent/image_name]/' \$[/myComponent/image_name]/\$[/myComponent/yaml_file] | $kubectl_path delete -f -  || echo ok
+							""".stripIndent(),
 						]
 						applicationTierName = null
 						processStepType = 'command'
@@ -106,10 +107,10 @@ project proj,{
 
 					processStep 'Deploy', {
 						actualParameter = [
-							commandToRun: '''\
-								kubectl config use-context $[/myEnvironment/context]
-								sed 's/image: .*/image: $[/myComponent/image_name]:$[$[/myComponent/componentName]_version]/' $[/myComponent/image_name]/$[/myComponent/yaml_file] | kubectl create -f -
-							'''.stripIndent(),
+							commandToRun: """\
+								$kubectl_path config use-context \$[/myEnvironment/context]
+								sed 's/image: .*/image: \$[/myComponent/image_name]:\$[\$[/myComponent/componentName]_version]/' \$[/myComponent/image_name]/\$[/myComponent/yaml_file] | $kubectl_path create -f -
+							""".stripIndent(),
 						]
 						applicationTierName = null
 						processStepType = 'command'
@@ -144,10 +145,10 @@ project proj,{
 					
 					processStep 'Uninstall', {
 						actualParameter = [
-							commandToRun: '''\
-								kubectl config use-context $[/myEnvironment/context]
-								sed 's/image: .*/image: $[/myComponent/image_name]/' $[/myComponent/image_name]/$[/myComponent/yaml_file] | kubectl delete -f -  || echo ok
-							'''.stripIndent(),
+							commandToRun: """\
+								$kubectl_path config use-context \$[/myEnvironment/context]
+								sed 's/image: .*/image: \$[/myComponent/image_name]/' \$[/myComponent/image_name]/\$[/myComponent/yaml_file] | $kubectl_path delete -f -  || echo ok
+							""".stripIndent(),
 						]
 						applicationTierName = null
 						processStepType = 'command'
